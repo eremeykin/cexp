@@ -12,12 +12,12 @@ if __name__ == "__main__":
     parser.add_option("--a", dest="a", help="'a' box parameter of Kovaleva generator")
 
     options, args = parser.parse_args()
-    seed = options['seed']
-    cardinality = options['cardinality']
-    n_clusters = options['n_clusters']
-    features = options['features']
-    n_objects = options['n_objects']
-    a = options['a']
+    seed = options.seed
+    cardinality = options.cardinality
+    n_clusters = options.n_clusters
+    features = options.features
+    n_objects = options.n_objects
+    a = options.a
 
     np.random.seed(seed)
     assert n_objects >= cardinality * n_clusters
