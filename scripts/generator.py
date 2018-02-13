@@ -4,12 +4,12 @@ from optparse import OptionParser
 
 if __name__ == "__main__":
     parser = OptionParser()
-    parser.add_option("--seed", dest="seed", help="generator seed")
-    parser.add_option("--cardinality", dest="cardinality", help="min cardinality of any cluster")
-    parser.add_option("--n_clusters", dest="n_clusters", help="number of clusters in dataset")
-    parser.add_option("--features", dest="features", help="number of features")
-    parser.add_option("--n_objects", dest="n_objects", help="number of objects")
-    parser.add_option("--a", dest="a", help="'a' box parameter of Kovaleva generator")
+    parser.add_option("--seed", dest="seed", type="int", help="generator seed")
+    parser.add_option("--cardinality", dest="cardinality", type="int", help="min cardinality of any cluster")
+    parser.add_option("--n_clusters", dest="n_clusters", type="int", help="number of clusters in dataset")
+    parser.add_option("--features", dest="features", type="int", help="number of features")
+    parser.add_option("--n_objects", dest="n_objects", type="int", help="number of objects")
+    parser.add_option("--a", dest="a", type="float", help="'a' box parameter of Kovaleva generator")
 
     options, args = parser.parse_args()
     seed = options.seed
