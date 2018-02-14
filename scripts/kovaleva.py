@@ -11,7 +11,6 @@ if __name__ == "__main__":
     parser.add_option("--n_objects", dest="n_objects", type="int", help="number of objects")
     parser.add_option("--a", dest="a", type="float", help="'a' box parameter of Kovaleva generator")
     parser.add_option("--folder", dest="folder", type="str", help="folder where to save")
-    parser.add_option("--basename", dest="basename", type="str", help="base name of file")
 
     options, args = parser.parse_args()
     seed = options.seed
@@ -21,7 +20,7 @@ if __name__ == "__main__":
     n_objects = options.n_objects
     a = options.a
     folder = options.folder.strip("/")
-    base_name = options.basename
+    base_name = "kovaleva"
 
     np.random.seed(seed)
     assert n_objects >= cardinality * n_clusters
