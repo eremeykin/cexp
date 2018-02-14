@@ -10,6 +10,8 @@ if __name__ == "__main__":
     parser.add_option("--features", dest="features", type="int", help="number of features")
     parser.add_option("--n_objects", dest="n_objects", type="int", help="number of objects")
     parser.add_option("--a", dest="a", type="float", help="'a' box parameter of Kovaleva generator")
+    parser.add_option("--folder", dest="folder", type="str", help="folder where to save")
+    parser.add_option("--basename", dest="basename", type="str", help="base name of file")
 
     options, args = parser.parse_args()
     seed = options.seed
@@ -18,11 +20,12 @@ if __name__ == "__main__":
     features = options.features
     n_objects = options.n_objects
     a = options.a
+    folder = options.folder.strip("/")
+    base_name = options.basename
 
     np.random.seed(seed)
     assert n_objects >= cardinality * n_clusters
     data, labels = kovaleva(cardinality, n_clusters, (n_objects, features), a)
-    base_name = "dataset"
     name = "{}_{n_obj}x{features}_c{n_cls}_m{card}_a{a}_s{seed}".format(base_name,
                                                                         n_obj=n_objects,
                                                                         features=features,
@@ -30,8 +33,13 @@ if __name__ == "__main__":
                                                                         card=cardinality,
                                                                         a=a,
                                                                         seed=seed)
-    np.savetxt(name + ".pts", data, delimiter=',', comments='',
+    pts_name = name + ".pts"
+    lbs_name = name + ".lbs"
+    pts_path = "/".join([folder, pts_name])
+    lbs_path = "/".join([folder, lbs_name])
+
+    np.savetxt(pts_path, data, delimiter=',', comments='',
                header=','.join(['F' + str(i) for i in range(data.shape[1])]))
-    np.savetxt(name + ".lbs", labels, delimiter=',', comments='',
+    np.savetxt(lbs_path, labels, delimiter=',', comments='',
                header=','.join(['F' + str(i) for i in range(data.shape[1])]))
 
