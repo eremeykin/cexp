@@ -39,6 +39,5 @@ if __name__ == "__main__":
 
     np.savetxt(pts_path, data, delimiter=',', comments='',
                header=','.join(['F' + str(i) for i in range(data.shape[1])]))
-    np.savetxt(lbs_path, labels, delimiter=',', comments='',
-               header=','.join(['F' + str(i) for i in range(data.shape[1])]))
+    np.savetxt(lbs_path, labels, delimiter=',', comments='', header="L")
 
