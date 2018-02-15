@@ -15,12 +15,12 @@ if __name__ == "__main__":
     seed = options.seed
 
     dataset_file = dataset.split("/")[-1]
-    dataset_name = dataset[:dataset.index(".")]  # without .pts
+    dataset_name = dataset_file[:-4]  # without .pts
     folder = "/".join(dataset.split("/")[:-1])
 
     data = pd.read_csv(dataset)
     data = data.as_matrix()
-    labels = pd.read_csv(dataset_name + ".lbs")
+    labels = pd.read_csv(folder + "/" + dataset_name + ".lbs")
     labels = labels.as_matrix()
     # set seed
     np.random.seed(seed)
