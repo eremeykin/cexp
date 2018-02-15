@@ -41,11 +41,9 @@ if __name__ == "__main__":
                     "p REAL,"
                     "beta REAL,"
                     "status TEXT,"
-                    "priority INTEGER,"
-                    "algorithm TEXT)")
+                    "priority INTEGER)")
         cur.execute("CREATE TABLE IF NOT EXISTS results("
-                    "id INTEGER PRIMARY KEY,"
-                    "task INTEGER,"
+                    "task INTEGER PRIMARY KEY,"
                     "algorithm TEXT,"
                     "time_init REAL,"
                     "time_kmeans REAL,"
@@ -54,19 +52,19 @@ if __name__ == "__main__":
                     "labels TEXT,"
                     "sw REAL,"
                     "FOREIGN KEY(task) REFERENCES tasks(id))")
+        
         datasets = [x for x in os.listdir(dataset_dir) if x[-4:] == ".pts"]
         p_range = [x / 10 for x in range(10, 51)]
         beta_range = [x / 10 for x in range(10, 51)]
-        # cur.execute('BEGIN TRANSACTION')
         id = 1
         status = None
-        algorithm = None
+        priority = 1
+        datasets.sort(key=lambda x: len(x))
         for dataset in datasets:
             for p in p_range:
                 for beta in beta_range:
                     print(dataset, p, beta)
-                    priority = 1
                     cur.execute(
-                        "INSERT INTO tasks VALUES(?,?,?,?,?,?,?)", (id, dataset, p, beta, status, priority, algorithm))
+                        "INSERT INTO tasks VALUES(?,?,?,?,?,?)", (id, dataset, p, beta, status, priority))
                     id += 1
-        # cur.execute('COMMIT')
+            priority += 1
