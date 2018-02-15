@@ -124,16 +124,19 @@ if __name__ == "__main__":
         from time import time
 
         s = time()
-        tasks = get_tasks(conn)
-        set_status(conn, "PEND", [task[0] for task in tasks])
-        for task in tasks:
-            id, dataset, p, beta, status, priority = task
-            k_star = get_k_star(dataset)
-            dataset = dataset_dir + "/" + dataset
-            algorithm, time_init, time_kmeans, time_award, labels, cluster_structure = single_run(dataset, p, beta,
-                                                                                                  k_star)
-            sw = calculate_sw(cluster_structure)
-            insert_result(conn, id, algorithm, time_init, time_kmeans, time_award, PC_INFO, str(labels), sw)
-            print("{} completed".format(id))
-        set_status(conn, "COMP", [task[0] for task in tasks])
-        print("10 completed: " + str(time() - s))
+        while True:
+            tasks = get_tasks(conn)
+            if len(tasks) < 1:
+                break
+            set_status(conn, "PEND", [task[0] for task in tasks])
+            for task in tasks:
+                id, dataset, p, beta, status, priority = task
+                k_star = get_k_star(dataset)
+                dataset = dataset_dir + "/" + dataset
+                algorithm, time_init, time_kmeans, time_award, labels, cluster_structure = single_run(dataset, p, beta,
+                                                                                                      k_star)
+                sw = calculate_sw(cluster_structure)
+                insert_result(conn, id, algorithm, time_init, time_kmeans, time_award, PC_INFO, str(labels), sw)
+                print("{} completed".format(id))
+            set_status(conn, "COMP", [task[0] for task in tasks])
+            print("10 completed: " + str(time() - s))
