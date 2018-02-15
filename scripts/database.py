@@ -1,6 +1,12 @@
 import sqlite3 as lite
 import os
 from optparse import OptionParser
+import MySQLdb
+
+hostname = '10.42.0.2'
+username = 'eremeykin'
+password = '1580'
+database = 'experiment'
 
 if __name__ == "__main__":
     parser = OptionParser()
@@ -10,10 +16,11 @@ if __name__ == "__main__":
     options, args = parser.parse_args()
     dataset_dir = options.datasetdir
     db_name = options.dbname
-    con = lite.connect('{dbname}.sqlite3'.format(dbname=db_name))
+    con = MySQLdb.connect(host=hostname, user=username, passwd=password, db=db_name)
+
     with con:
         cur = con.cursor()
-        # cur.execute("DROP TABLE IF EXISTS results")
+        cur.execute("DROP TABLE IF EXISTS results")
         cur.execute("DROP TABLE IF EXISTS tasks")
         cur.execute("CREATE TABLE tasks("
                     "id INTEGER PRIMARY KEY,"
@@ -30,7 +37,6 @@ if __name__ == "__main__":
                     "time_award REAL,"
                     "pc_config TEXT,"
                     "labels TEXT,"
-                    "cs BLOB,"
                     "sw REAL,"
                     "FOREIGN KEY(task) REFERENCES tasks(id))")
         datasets = [x for x in os.listdir(dataset_dir) if x[-4:] == ".pts"]
@@ -45,6 +51,7 @@ if __name__ == "__main__":
                 for beta in beta_range:
                     print(dataset, p, beta)
                     cur.execute(
-                        "INSERT INTO tasks VALUES(?,?,?,?,?,?)", (id, dataset, p, beta, status, priority))
+                        "INSERT INTO tasks VALUES(%s,%s,%s,%s,%s,%s)", (id, dataset, p, beta, status, priority))
+                        # "INSERT INTO tasks VALUES(?,?,?,?,?,?)", (id, dataset, p, beta, status, priority))
                     id += 1
             priority += 1

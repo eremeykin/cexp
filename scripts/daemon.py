@@ -11,6 +11,7 @@ from time import time
 import re
 import pandas as pd
 import pickle
+import MySQLdb
 
 
 def get_pc_info(password):
@@ -32,7 +33,7 @@ PC_INFO = get_pc_info("1580")
 SELECT_TASKS = """SELECT * FROM tasks 
 WHERE tasks.status is Null
 ORDER BY tasks.priority
-LIMIT 100"""
+LIMIT 10"""
 
 SET_STATUS = """UPDATE tasks
 SET status = "{status}"
@@ -41,29 +42,26 @@ WHERE id IN"""
 
 def get_tasks(conn):
     cursor = conn.cursor()
-    print("\t")
     cursor.execute(SELECT_TASKS)
-    print("/t")
     return cursor.fetchall()
 
 
 def set_status(conn, status, ids):
     cursor = conn.cursor()
-    print("\s")
     cursor.execute(SET_STATUS.format(status=status) + str(tuple(ids)))
-    print("/s")
+    conn.commit()
+
 
 def get_k_star(datasetname):
     return int(re.search('_c(\d+)_', datasetname).group(1))
 
 
-def insert_result(conn, task, algorithm, time_init, time_kmeans, time_award, pc_config, labels, sw, cs):
+def insert_result(conn, task, algorithm, time_init, time_kmeans, time_award, pc_config, labels, sw):
     cursor = conn.cursor()
-    print("\i")
     cursor.execute(
-        "INSERT INTO results VALUES(?,?,?,?,?,?,?,?,?)",
-        (task, algorithm, time_init, time_kmeans, time_award, pc_config, labels, sw, pickle.dumps(cs)))
-    print("/i")
+        "INSERT INTO results VALUES(%s,%s,%s,%s,%s,%s,%s,%s)",
+        (task, algorithm, time_init, time_kmeans, time_award, pc_config, labels, sw))
+
 
 def calculate_sw(cluster_structure):
     sw = ChooseP.AvgSilhouetteWidthCriterion()
@@ -106,15 +104,21 @@ def single_run(data, p, beta, k_star):
     return algorithm, time_init, time_kmeans, time_award, labels, cluster_structure
 
 
+hostname = '10.42.0.2'
+username = 'eremeykin'
+password = '1580'
+database = 'experiment'
+
 if __name__ == "__main__":
     parser = OptionParser()
     parser.add_option("--datasetdir", dest="datasetdir", type="str", help="directory of datasets folder")
-    parser.add_option("--db", default="../experiment.sqlite3", dest="db", type="str", help="path to database")
+    parser.add_option("--dbname", dest="dbname", default="experiment", type="str", help="database file name")
+
     options, args = parser.parse_args()
-    db = options.db
+    db_name = options.dbname
     dataset_dir = options.datasetdir
 
-    conn = lite.connect(db)
+    conn = MySQLdb.connect(host=hostname, user=username, passwd=password, db=db_name)
     with conn:
         cur = conn.cursor()
         from time import time
@@ -129,8 +133,7 @@ if __name__ == "__main__":
             algorithm, time_init, time_kmeans, time_award, labels, cluster_structure = single_run(dataset, p, beta,
                                                                                                   k_star)
             sw = calculate_sw(cluster_structure)
-            insert_result(conn, id, algorithm, time_init, time_kmeans, time_award, PC_INFO, str(labels), sw,
-                          cluster_structure)
+            insert_result(conn, id, algorithm, time_init, time_kmeans, time_award, PC_INFO, str(labels), sw)
             print("{} completed".format(id))
         set_status(conn, "COMP", [task[0] for task in tasks])
-        print("100 completed: " + str(time() - s))
+        print("10 completed: " + str(time() - s))
