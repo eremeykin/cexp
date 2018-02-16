@@ -123,8 +123,8 @@ if __name__ == "__main__":
         cur = conn.cursor()
         from time import time
 
-        s = time()
         while True:
+            s = time()
             tasks = get_tasks(conn)
             if len(tasks) < 1:
                 break
@@ -136,10 +136,14 @@ if __name__ == "__main__":
                 dataset = dataset_dir + "/" + dataset
                 algorithm, time_init, time_kmeans, time_award, labels, cluster_structure = single_run(dataset, p, beta,
                                                                                                       k_star)
+                sw_start = time()
                 sw = calculate_sw(cluster_structure)
                 task_end = time()
                 insert_result(conn, id, algorithm, time_init, time_kmeans, time_award, PC_INFO, str(labels), sw)
                 insert_end = time()
-                print("{} completed, task: {:15.2}, insert: {:15.2}".format(id, insert_end - task_end, task_end - task_start))
+                print("{} completed, task: {:15.2f}, sw={:15.2f} ,insert: {:15.2f}".format(id,
+                                                                                           task_end - task_start,
+                                                                                           task_end - sw_start,
+                                                                                           insert_end - task_end))
             set_status(conn, "COMP", [task[0] for task in tasks])
-            print("10 completed: {:15.2}".format(time() - s))
+            print("10 completed: {:15.2f}".format(time() - s))
