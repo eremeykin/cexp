@@ -3,7 +3,6 @@ from clustering.agglomerative.utils.imwk_means_cluster_structure import IMWKMean
 from clustering.agglomerative.ik_means.ik_means import IKMeans
 from clustering.agglomerative.a_ward_pb import AWardPB as AWardPB_
 from clustering.agglomerative.utils.choose_p import ChooseP
-import sqlite3 as lite
 from subprocess import Popen, PIPE
 from shlex import split
 from optparse import OptionParser
@@ -39,6 +38,11 @@ SET_STATUS = """UPDATE tasks
 SET status = "{status}"
 WHERE id IN"""
 
+SELECT_CACHED_LABELS = """SELECT results.sw FROM results
+WHERE labels = "{labels}"
+LIMIT 1
+"""
+
 
 def get_tasks(conn):
     cursor = conn.cursor()
@@ -63,9 +67,16 @@ def insert_result(conn, task, algorithm, time_init, time_kmeans, time_award, pc_
         (task, algorithm, time_init, time_kmeans, time_award, pc_config, labels, sw))
 
 
-def calculate_sw(cluster_structure):
-    sw = ChooseP.AvgSilhouetteWidthCriterion()
-    return sw(cluster_structure)
+def calculate_sw(conn, labels, cluster_structure):
+    cursor = conn.cursor()
+    r_count = cursor.execute(SELECT_CACHED_LABELS.format(labels=labels))
+    if r_count == 1:
+        res = cursor.fetchall()[0][0]
+        print("cache match")
+        return res
+    else:
+        sw = ChooseP.AvgSilhouetteWidthCriterion()
+        return sw(cluster_structure)
 
 
 def single_run(data, p, beta, k_star):
@@ -137,7 +148,7 @@ if __name__ == "__main__":
                 algorithm, time_init, time_kmeans, time_award, labels, cluster_structure = single_run(dataset, p, beta,
                                                                                                       k_star)
                 sw_start = time()
-                sw = calculate_sw(cluster_structure)
+                sw = calculate_sw(conn, str(labels), cluster_structure)
                 task_end = time()
                 insert_result(conn, id, algorithm, time_init, time_kmeans, time_award, PC_INFO, str(labels), sw)
                 insert_end = time()
