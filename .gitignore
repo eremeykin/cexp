@@ -1,2 +1,4 @@
 .idea/
 .fuse*
+img/
+__pycache__/
