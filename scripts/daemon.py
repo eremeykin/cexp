@@ -79,6 +79,7 @@ def calculate_sw(conn, labels, cluster_structure, cache):
             return res
     if cache == 'dict':
         if labels in SW_CACHE:
+            print("dict cache match")
             return SW_CACHE[labels]
     sw = ChooseP.AvgSilhouetteWidthCriterion()
     SW_CACHE[labels] = sw
@@ -140,7 +141,7 @@ if __name__ == "__main__":
     cache = options.cache
 
     limit = options.limit
-    SELECT_TASKS.format(limit=limit)
+    SELECT_TASKS = SELECT_TASKS.format(limit=limit)
 
     conn = MySQLdb.connect(host=hostname, user=username, passwd=password, db=db_name)
     with conn:
