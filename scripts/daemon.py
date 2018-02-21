@@ -81,9 +81,10 @@ def calculate_sw(conn, labels, cluster_structure, cache):
         if labels in SW_CACHE:
             print("dict cache match")
             return SW_CACHE[labels]
-    sw = ChooseP.AvgSilhouetteWidthCriterion()
+    SW = ChooseP.AvgSilhouetteWidthCriterion()
+    sw = SW(cluster_structure)
     SW_CACHE[labels] = sw
-    return sw(cluster_structure)
+    return sw
 
 
 def single_run(data, p, beta, k_star):
