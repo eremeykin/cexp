@@ -32,7 +32,7 @@ PC_INFO = get_pc_info("1580")
 SELECT_TASKS = """SELECT * FROM tasks 
 WHERE tasks.status is Null
 ORDER BY tasks.priority
-LIMIT 10"""
+LIMIT {limit}"""
 
 SET_STATUS = """UPDATE tasks
 SET status = "{status}"
@@ -42,6 +42,8 @@ SELECT_CACHED_LABELS = """SELECT results.sw FROM results
 WHERE labels = "{labels}"
 LIMIT 1
 """
+
+SW_CACHE = dict()
 
 
 def get_tasks(conn):
@@ -67,16 +69,20 @@ def insert_result(conn, task, algorithm, time_init, time_kmeans, time_award, pc_
         (task, algorithm, time_init, time_kmeans, time_award, pc_config, labels, sw))
 
 
-def calculate_sw(conn, labels, cluster_structure):
-    cursor = conn.cursor()
-    r_count = cursor.execute(SELECT_CACHED_LABELS.format(labels=labels))
-    if r_count == 1:
-        res = cursor.fetchall()[0][0]
-        print("cache match")
-        return res
-    else:
-        sw = ChooseP.AvgSilhouetteWidthCriterion()
-        return sw(cluster_structure)
+def calculate_sw(conn, labels, cluster_structure, cache):
+    if cache == 'db':
+        cursor = conn.cursor()
+        r_count = cursor.execute(SELECT_CACHED_LABELS.format(labels=labels))
+        if r_count == 1:
+            res = cursor.fetchall()[0][0]
+            print("db cache match")
+            return res
+    if cache == 'dict':
+        if labels in SW_CACHE:
+            return SW_CACHE[labels]
+    sw = ChooseP.AvgSilhouetteWidthCriterion()
+    SW_CACHE[labels] = sw
+    return sw(cluster_structure)
 
 
 def single_run(data, p, beta, k_star):
@@ -125,9 +131,16 @@ if __name__ == "__main__":
     parser.add_option("--datasetdir", dest="datasetdir", type="str", help="directory of datasets folder")
     parser.add_option("--dbname", dest="dbname", default="experiment", type="str", help="database file name")
 
+    parser.add_option("--cache", dest="cache", default="db", type="str", help="type of cache")
+    parser.add_option("--limit", dest="limit", default="10", type="str", help="limit of tasks to capture")
+
     options, args = parser.parse_args()
     db_name = options.dbname
     dataset_dir = options.datasetdir
+    cache = options.cache
+
+    limit = options.limit
+    SELECT_TASKS.format(limit=limit)
 
     conn = MySQLdb.connect(host=hostname, user=username, passwd=password, db=db_name)
     with conn:
@@ -148,7 +161,7 @@ if __name__ == "__main__":
                 algorithm, time_init, time_kmeans, time_award, labels, cluster_structure = single_run(dataset, p, beta,
                                                                                                       k_star)
                 sw_start = time()
-                sw = calculate_sw(conn, str(labels), cluster_structure)
+                sw = calculate_sw(conn, str(labels), cluster_structure, cache=cache)
                 task_end = time()
                 insert_result(conn, id, algorithm, time_init, time_kmeans, time_award, PC_INFO, str(labels), sw)
                 insert_end = time()
