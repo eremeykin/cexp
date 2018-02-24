@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from optparse import OptionParser
 import MySQLdb
 import numpy as np
-from scripts.daemon import get_k_star
+from scripts.utils import get_k_star
 import os
 
 hostname = '10.42.0.2'
