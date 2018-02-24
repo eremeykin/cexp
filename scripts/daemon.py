@@ -7,7 +7,7 @@ from subprocess import Popen, PIPE
 from shlex import split
 from optparse import OptionParser
 from time import time
-import re
+from scripts.utils import get_k_star
 import pandas as pd
 import pickle
 import MySQLdb
@@ -56,10 +56,6 @@ def set_status(conn, status, ids):
     cursor = conn.cursor()
     cursor.execute(SET_STATUS.format(status=status) + str(tuple(ids)))
     conn.commit()
-
-
-def get_k_star(datasetname):
-    return int(re.search('_c(\d+)_', datasetname).group(1))
 
 
 def insert_result(conn, task, algorithm, time_init, time_kmeans, time_award, pc_config, labels, sw):
