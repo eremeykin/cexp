@@ -1,4 +1,5 @@
 .idea/
 .fuse*
+dump/
 img/
 __pycache__/
