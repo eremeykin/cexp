@@ -27,8 +27,6 @@ def get_pc_info(password):
     return "{cpu} / {mem} Mb".format(cpu=cpu, mem=mem)
 
 
-PC_INFO = get_pc_info("1580")
-
 SELECT_TASKS = """SELECT * FROM tasks 
 WHERE tasks.status is Null
 ORDER BY tasks.priority
@@ -125,6 +123,7 @@ password = '1580'
 database = 'experiment'
 
 if __name__ == "__main__":
+    PC_INFO = get_pc_info("1580")
     parser = OptionParser()
     parser.add_option("--datasetdir", dest="datasetdir", type="str", help="directory of datasets folder")
     parser.add_option("--dbname", dest="dbname", default="experiment", type="str", help="database file name")
