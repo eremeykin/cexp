@@ -48,8 +48,8 @@ class Dumper:
         sw_matrix[:] = np.nan
         for result_row in result:
             p, beta, sw = result_row
-            row = 50 - int(beta * 10)
-            col = int(p * 10) - 10
+            row = beta_to_row(beta)  # 50 - int(beta * 10)
+            col = p_to_col(p)  # int(p * 10) - 10
             sw_matrix[row, col] = sw
         return sw_matrix
 
