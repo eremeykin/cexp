@@ -30,7 +30,6 @@ if __name__ == "__main__":
 
     undumper = UnDumper(dump_directory)
     all_results = undumper.undump_all()
-    draw_colorbar = True
 
     for dataset, sw_matrix in all_results.items():
         start = time()
@@ -45,6 +44,8 @@ if __name__ == "__main__":
             results_dir = "/".join([results_dir, str(chunk_size)])
         if not os.path.isdir(results_dir):
             os.makedirs(results_dir)
+        plt.xlabel("p parameter")
+        plt.ylabel("beta parameter")
         plt.savefig(results_dir + "/" + cut_extention(dataset) + ".png", dpi=150)
         plt.close()
         end = time()
