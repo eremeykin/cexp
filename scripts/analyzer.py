@@ -19,22 +19,38 @@ def max(matrix):
 
 
 def convert_p_beta(row):
-    return np.array([row_to_beta(row[0]), col_to_p(row[1])])
+    # swap because sw is matrix and
+    # row -- zero [0] -- y -- beta
+    # col -- first [1] -- x -- p
+    return np.array([col_to_p(row[1]), row_to_beta(row[0])])
 
 
 def pick_best(sw_matrix, strategy, eps=0.000001):
     max_indices = np.argwhere(sw_matrix > np.amax(sw_matrix) - eps)
     max_indices = np.apply_along_axis(convert_p_beta, 1, max_indices)
+
     if strategy == "first":
         distances = np.sum(max_indices ** 2, 1)
         max_index = max_indices[np.argmin(distances)]
-        beta, p = max_index[0], max_index[1]
+        p, beta = max_index[0], max_index[1]
+        # print("p={}, beta={}".format(p, beta))
         return p, beta
     elif strategy == "mean":
         p_m, beta_m = np.mean(max_indices, axis=0)
         return round(p_m), round(beta_m)
     elif strategy == "mean_s":
         raise RuntimeError()
+    elif strategy == "mean*":
+        p_m, beta_m = np.mean(max_indices, axis=0)
+        p_best, beta_best = max_indices[0]
+        current_min = (p_best - p_m) ** 2 + (beta_best - beta_m) ** 2
+        for p_beta in max_indices:
+            p_current, beta_current = p_beta
+            new_min = (p_current - p_m) ** 2 + (beta_current - beta_m) ** 2
+            if new_min < current_min:
+                current_min = new_min
+                p_best, beta_best = p_current, beta_current
+        return p_best, beta_best
     raise RuntimeError()
 
 
@@ -141,20 +157,26 @@ if __name__ == "__main__":
     pprint(base_datasets)
     pprint(algorithms)
 
-    headers = ["dataset"] + algorithms
-    table = []
+    i=0
+    for strategy in ["first", "mean", "mean*"]:
 
-    ds = base_datasets[0]
-    for dataset in base_datasets:
-        row = [dataset]
-        for algorithm in algorithms:
-            aris = get_aris(all_results, dataset, algorithm, "mean")
-            print("{} for {} ARI mean = {:6.3f}, std = {:6.3f}".format(dataset, algorithm, np.mean(aris), np.std(aris)))
-            row += ["({:6.3f}, {:6.3f})".format(np.mean(aris), np.std(aris))]
-        table += [row]
-    with open("table.dump", "wb") as tdump:
-        pickle.dump(table, tdump)
-    # with open("table.dump", "rb") as tdump:
-    #     table = pickle.load(tdump)
-    t = tabulate.tabulate(table, headers, tablefmt="plain", numalign="right")
-    print(t)
+        headers = ["dataset"] + algorithms
+        table = []
+
+        ds = base_datasets[0]
+        for dataset in base_datasets:
+            row = [dataset]
+            for algorithm in algorithms:
+                aris = get_aris(all_results, dataset, algorithm, strategy)
+                print("{} for {} ARI mean = {:6.3f}, std = {:6.3f}".format(dataset, algorithm, np.mean(aris), np.std(aris)))
+                print("{}/330".format(i))
+                i+=1
+                row += ["({:6.3f}, {:6.3f})".format(np.mean(aris), np.std(aris))]
+            table += [row]
+        # with open("table.dump", "wb") as tdump:
+        #     pickle.dump(table, tdump)
+        # with open("table.dump", "rb") as tdump:
+        #     table = pickle.load(tdump)
+        t = tabulate.tabulate(table, headers, tablefmt="plain", numalign="right")
+        print("strategy:{}".format(strategy))
+        print(t)

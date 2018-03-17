@@ -7,7 +7,7 @@ from scripts.dumper import UnDumper
 from time import time
 
 def plot_heatmap(sw_matrix, dataset):
-    plt.imshow(sw_matrix, cmap='hot', interpolation='nearest')
+    plt.imshow(sw_matrix, cmap='hot', interpolation='nearest',  vmin=-1, vmax=1)
     plt.title(dataset)
     range = np.linspace(1.0, 5.0, 41, endpoint=True)
     plt.xticks(np.arange(len(range)), range, rotation='vertical')
@@ -19,9 +19,9 @@ def plot_heatmap(sw_matrix, dataset):
 
 if __name__ == "__main__":
     parser = OptionParser()
-    parser.add_option("--dumpdirectory", dest="dumpdirectory", default="../dump", type="str",
+    parser.add_option("--dumpdirectory", dest="dumpdirectory", default="../dump/ari", type="str",
                       help="directory to read dumps")
-    parser.add_option("--imgdirectory", dest="imgdirectory", default="../img", type="str",
+    parser.add_option("--imgdirectory", dest="imgdirectory", default="../img/ari", type="str",
                       help="directory to read dumps")
 
     options, args = parser.parse_args()
