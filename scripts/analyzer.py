@@ -136,7 +136,7 @@ def get_aris(results, base_dataset, algorithm, strategy):
 
 if __name__ == "__main__":
     parser = OptionParser()
-    parser.add_option("--dumpdirectory", dest="dumpdirectory", default="../dump", type="str",
+    parser.add_option("--dumpdirectory", dest="dumpdirectory", default="../dump/ari", type="str",
                       help="directory to read dumps")
 
     parser.add_option("--datadirectory", dest="datadirectory", type="str",
@@ -168,7 +168,7 @@ if __name__ == "__main__":
             row = [dataset]
             for algorithm in algorithms:
                 aris = get_aris(all_results, dataset, algorithm, strategy)
-                print("{} for {} ARI mean = {:6.3f}, std = {:6.3f}".format(dataset, algorithm, np.mean(aris), np.std(aris)))
+                # print("{} for {} ARI mean = {:6.3f}, std = {:6.3f}".format(dataset, algorithm, np.mean(aris), np.std(aris)))
                 print("{}/330".format(i))
                 i+=1
                 row += ["({:6.3f}, {:6.3f})".format(np.mean(aris), np.std(aris))]
